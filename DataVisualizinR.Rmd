@@ -1,0 +1,186 @@
+---
+title: "DataVisualization_AssignmentSPR23"
+author: "Dasia Simpson"
+date: "2023-02-26"
+output: html_document
+---
+# Introduction to visualization in R – 50 pts
+
+###  Data description
+Here we are going to analyze mycotoxin data that has been collected from wheat heads grown in the greenhouse inoculated with Fusarium graminearum (Fg) with or without fungal endophytes to protect against Fg. The experiment was performed by inoculating the heads with Fg (positive control), Fg + 1 of 3 endophytes (Fg + 40, Fg + 70, or Fg + 37), and the non-treated control (NTC). Therefore, the experiment was five treatments with 6-10 technical replicates and three experimental replicates. The authors quantified the parts per million (ppm) mycotoxins Deoxynivalenol (DON) and the variant 15ADON from the wheat grain and this is your main response variable. In other words, we are interested to know if the fungal endophytes were able to reduce the concentration of DON on wheat heads. This was done across two wheat cultivars, a winter wheat variety Ambassador and spring wheat variety Wheaton. 
+
+
+#### Question 1 
+```
+# Explain the following concepts about ggplot 
+
+a.	What is a geom? 
+Geom is a geometric object within R package ggplot. It is a layered structure that combines data and statistical positioning. 
+
+b.	What is a facet? 
+Facet is a function within ggplot that splits a plot into panels depending on how variables are present.
+
+c.	Explain the concept of layering. 
+GGplot allows you to layer on each property or characteristic that contributes to the visualization of a graph. 
+
+d.	Where do you add x and y variables and map different shapes, colors, and other attributes to the data? 
+In ggplot, variables such as x and y, colors and other attributes are added within the (aes) or aesthetic property layer. 
+
+e.	Explain what ‘jittering’ does and why it’s important.
+Jittering is visualize data that may be hidden because of overplotting, thus making plots more easy to interpet. 
+```
+
+
+
+#### Questions 2-8 
+``` {r}
+library(ggplot2)
+datam <- read.csv("MycotoxinData.csv", header = TRUE, na.strings = "NA")
+#to figure out whether data read in continuous or catergorical because plot
+# looks insane 
+#character = catagorical
+#numeric = continous 
+class(datam$Treatment)
+class(datam$DON)
+
+
+# Question 2
+# Make a boxplot using ggplot with DON as the y variable, treatment as the x variable, and color mapped to the wheat cultivar. Show the code you use to load the libraries you need read in the data and make the plot. Change the y label to “DON (ppm)” and make the x label blank.
+ggplot(data = datam, aes(x=Treatment, y=DON, fill = Cultivar)) +
+  geom_bar(stat='identity') +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank())
+
+
+
+# Question 3
+# Now convert this same data into a bar chart with standard-error error bars
+ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar)) + 
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank())
+
+# Question 4
+#	Add points to the foreground of the boxplot and bar chart you made in questions 2 and 3 that show the distribution of points over the boxplots or bars. Set the shape = 21 and outline color black (hint: use jitter_dodge). 
+
+ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar,)) +
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) +
+  geom_point(pch = 21, position = position_jitterdodge())
+
+
+#Question 5
+# Change the color and fill of the points and boxplots to match some of the colors in the following colorblind pallet. 
+ 
+g_5 <- ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar,)) +
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) +
+  geom_point(pch = 21, position = position_jitterdodge())
+
+g_5 + scale_fill_manual(values=c("#56B4E9", "#E69F00"))
+
+
+# Question 6
+# Add a facet to the plots based on cultivar.
+ 
+ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar,)) +
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) +
+  geom_point(pch = 21, position = position_jitterdodge()) +
+  facet_wrap(~Cultivar)
+
+# Question 7
+# Explore the themes and change to a theme of interest. 
+
+g_7 <- ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar,)) +
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) +
+  geom_point(pch = 21, position = position_jitterdodge())
+
+g_7 + theme_classic(base_size = 10)
+
+
+#Question 8
+#Add transparency to the points so you can still see the boxplot or bar in the background. 
+#alpha changes the transparency of the points
+
+ggplot(datam, aes(x = Treatment, y = DON, fill = Cultivar)) +
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) +
+  geom_point(alpha = 0.3 ,pch = 21, position = position_jitterdodge()) +
+  facet_wrap(~Cultivar)
+```
+
+#### Question 9
+Explain what the box plot and bar charts are showing.How are they similar? How are they different? Which representation of the data are better and why? 
+Both bar plots and bar charts show you the distribution of data. However, box plots include distribution within quartiles on either sides of the median, and one outliers. Though you can add error bars to a bar chart, I believe box plots are the best way to present this data provided 
+
+
+
+
+#### Question 10
+``` {r} 
+# Question 10
+#Explore two other ways to represent the same data
+#https://ggplot2.tidyverse.org/reference/ . Plot them and show the code here. Which one would you choose to represent your data and why? 
+# I decided to create a violin plot to show the  distributions of continuous variable "DON" among each treatment.
+ggplot(data = datam, aes(x=Treatment, y=DON, fill = Cultivar)) +
+  geom_violin(scale = "width") +
+  geom_jitter(alpha = 0.5, shape=21, position=position_jitter(0.2)) +
+  facet_wrap(~Cultivar)
+
+
+# To interpret each Cutivar group easily, I decided to subset each group and produce a bar plot. This chart is more suitable for a non scientific audience and can be easily digested. 
+
+#subsetted the Cutivar group "Wheaton" 
+# %in% to subset
+ggplot(subset(datam,Cultivar %in% "Wheaton"), aes(x=Treatment, y=DON, fill = Cultivar)) +
+  geom_bar(stat='identity') +
+  ylab("DON (ppm)") 
+
+ggplot(subset(datam,Cultivar %in% "Ambassador"), aes(x=Treatment, y=DON, fill = Cultivar)) +
+  geom_bar(stat='identity') +
+  ylab("DON (ppm)") 
+  
+```
+
+#### Playing around with the data
+```{r}
+##Playing around with the data 
+
+
+library(dplyr)
+df.summary <- datam %>%
+  group_by(Treatment) %>%
+  summarise(
+    sd = sd(DON, na.rm = TRUE),
+    DON = mean(DON,na.rm = TRUE)
+  )
+
+df.summary
+
+ggplot(df.summary, aes(Treatment, DON)) + 
+  geom_col(fill = "lightgray", color = "black") +
+  geom_errorbar(aes(ymin = DON, ymax = DON+sd)) +
+  ylab("DON (ppm)") +
+  theme (axis.title.x = element_blank()) 
+
+```
+
+
+
+
+
+
+
